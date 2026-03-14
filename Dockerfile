@@ -1,6 +1,6 @@
 FROM node:24-alpine AS builder
 
-WORKDIR /usr/src
+WORKDIR /app
 
 COPY package*.json ./
 RUN npm ci
@@ -11,15 +11,13 @@ RUN npm run build
 
 FROM node:24-alpine AS runner
 
-WORKDIR /usr/src
+WORKDIR /app
+ENV NODE_ENV=production
 
 COPY package*.json ./
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --omit=dev
 
-COPY --from=builder /usr/src/build ./build
-COPY --from=builder /usr/src/server ./server
-COPY --from=builder /usr/src/public ./public
+COPY --from=builder /app ./
 
 EXPOSE 8080
-
 CMD ["npm", "start"]
